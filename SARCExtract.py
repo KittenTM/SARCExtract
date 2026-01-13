@@ -5,6 +5,7 @@
 import os
 import sys
 import struct
+import glob
 
 from libyaz0 import decompress as Yaz0Dec
 
@@ -193,16 +194,8 @@ def sarc_extract(data, mode):
 
     print("Done!")
 
-
-def main():
-    print("SARCExtract v0.5 by MasterVermilli0n/AboodXD")
-    print("Originally by NWPlayer123")
-
-    if len(sys.argv) != 2:
-        print("Usage: SARCExtract archive.szs")
-        sys.exit(1)
-
-    with open(sys.argv[1], "rb") as f:
+def process_file(path):
+    with open(path, "rb") as f:
         data = f.read()
 
     magic = data[0:4]
@@ -215,8 +208,30 @@ def main():
         sarc_extract(data, 0)
 
     else:
-        print("Unknown File Format: First 4 bytes of file must be Yaz0 or SARC")
+        print(f"{path}: Unknown File Format (not Yaz0 or SARC)")
+
+def main():
+    print("SARCExtract")
+
+    if len(sys.argv) < 2:
+        print("Usage: SARCExtract <archive or *")
         sys.exit(1)
+
+    files = []
+    for arg in sys.argv[1:]:
+        expanded = glob.glob(arg)
+        if not expanded:
+            print(f"No matches found for {arg}")
+        files.extend(expanded)
+
+    if not files:
+        print("No files to process.")
+        sys.exit(1)
+
+    for path in files:
+        print(f"\nExtracting: {path}")
+        sys.argv[1] = path
+        process_file(path)
 
 if __name__ == "__main__":
     main()
